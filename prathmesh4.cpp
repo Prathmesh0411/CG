@@ -1,103 +1,94 @@
-#include<iostream>
-#include<graphics.h>
-#include <bits/stdc++.h>
-
+#include <graphics.h>
+#include <math.h>
+#include <iostream>
 using namespace std;
-class algo
-{
+
+// Class for DDA Line Drawing
+class Line {
 public:
-void dda_line(float x1, float y1, float x2, float y2);
-void bresneham_cir(int r);
+    void drawLine(int x1, int y1, int x2, int y2) {
+        int dx = x2 - x1;
+        int dy = y2 - y1;
 
+        int steps = abs(dx) > abs(dy) ? abs(dx) : abs(dy);
+
+        float Xinc = dx / (float)steps;
+        float Yinc = dy / (float)steps;
+
+        float X = x1;
+        float Y = y1;
+
+        for (int i = 0; i <= steps; i++) {
+            putpixel(round(X), round(Y), WHITE);
+            X += Xinc;
+            Y += Yinc;
+        }
+    }
 };
-void algo::dda_line(float x1, float y1, float x2, float y2)
-{
-float x,y,dx,dy,step;
-int i;
 
-//step 2
-dx=abs(x2-x1);
-dy=abs(y2-y1);
-cout<<"dy="<<dy<<"\tdx="<<dx;
-//step 3
-if(dx>=dy)
-step=dx;
-else
-step=dy;
-cout<<"\n"<<step<<endl;
-//step 4
-float xinc=float((x2-x1)/step);
-float yinc=float((y2-y1)/step);
-//step 5
-x=x1;
-y=y1;
-// outtextxy(0,0,"(0,0)");
-//step 6
+// Class for Bresenham’s Circle Drawing
+class Circle {
+public:
+    void drawCircle(int xc, int yc, int r) {
+        int x = 0, y = r;
+        int d = 3 - 2 * r;
+        drawCirclePoints(xc, yc, x, y);
+        while (y >= x) {
+            x++;
+            if (d > 0) {
+                y--;
+                d = d + 4 * (x - y) + 10;
+            } else
+                d = d + 4 * x + 6;
+            drawCirclePoints(xc, yc, x, y);
+        }
+    }
 
-i=1;
-while(i<=step)
-{
-//cout<<endl<<"\t"<<i<<"\t(x,y)=("<<x<<","<<y<<")";
-putpixel(320+x,240-y,4);
-x=x+xinc;
-y=y+yinc;
-i=i+1;
-// delay(10);
-}
+private:
+    void drawCirclePoints(int xc, int yc, int x, int y) {
+        putpixel(xc + x, yc + y, WHITE);
+        putpixel(xc - x, yc + y, WHITE);
+        putpixel(xc + x, yc - y, WHITE);
+        putpixel(xc - x, yc - y, WHITE);
+        putpixel(xc + y, yc + x, WHITE);
+        putpixel(xc - y, yc + x, WHITE);
+        putpixel(xc + y, yc - x, WHITE);
+        putpixel(xc - y, yc - x, WHITE);
+    }
+};
 
-}
+// Main class that integrates the shapes
+class Pattern {
+    Line line;
+    Circle circle;
 
-void algo::bresneham_cir(int r)
-{
-float x,y,p;
-x=0;
-y=r;
-p=3-(2*r);
-while(x<=y)
-{
-putpixel(320+x,240+y,1);
-putpixel(320-x,240+y,2);
-putpixel(320+x,240-y,3);
-putpixel(320-x,240-y,5);
-putpixel(320+y,240+x,6);
-putpixel(320+y,240-x,7);
-putpixel(320-y,240+x,8);
-putpixel(320-y,240-x,9);
-x=x+1;
-if(p<0)
-{
-p=p+4*(x)+6;
-}
-else
-{
-p=p+4*(x-y)+10;
-y=y-1;
-}
-// delay(20);
-}
-}
+public:
+    void drawPattern() {
+        // Draw Rectangle using DDA Line algorithm
+        line.drawLine(200, 150, 400, 150);
+        line.drawLine(400, 150, 400, 300);
+        line.drawLine(400, 300, 200, 300);
+        line.drawLine(200, 300, 200, 150);
 
-int main()
-{
-algo a1;
-int i;
-float r,ang,r1;
-cout<<"Enter radius of circle";
-cin>>r;
-int gd = DETECT,gm;
-initgraph(&gd,&gm,NULL);
-setcolor(1);
+        // Draw Circle using Bresenham's Circle algorithm
+        circle.drawCircle(300, 225, 60);
 
-a1.bresneham_cir((int)r);
-ang=3.24/180;
-float c=r*cos(30*ang);
-float s=r*sin(30*ang);
-a1.dda_line(0,r,0-c,0-s);
-a1.dda_line(0-c,0-s,0+c,0-s);
-a1.dda_line(0+c,0-s,0,r);
-r1=s;
-a1.bresneham_cir((int)r1);
-getch();
-closegraph();
-return 0;
+        // Draw Diagonal lines for the diamond shape
+        line.drawLine(200, 225, 300, 150);  // Top-left diagonal
+        line.drawLine(300, 150, 400, 225);  // Top-right diagonal
+        line.drawLine(400, 225, 300, 300);  // Bottom-right diagonal
+        line.drawLine(300, 300, 200, 225);  // Bottom-left diagonal
+    }
+};
+
+int main() {
+    int gd = DETECT, gm;
+    initgraph(&gd, &gm, " ");
+
+    Pattern pattern;
+    pattern.drawPattern();
+
+    getch();
+    closegraph();
+    return 0;
 }
